@@ -7,6 +7,7 @@
       </div>
       <nav class="flex gap-4">
         <a href="#" @click.prevent="currentView = 'dashboard'" :class="{'font-bold underline': currentView === 'dashboard'}">Dashboard</a>
+        <a href="#" @click.prevent="currentView = 'register'" :class="{'font-bold underline': currentView === 'register'}">Registro</a>
         <a href="#" @click.prevent="currentView = 'checkin'" :class="{'font-bold underline': currentView === 'checkin'}">Simulador QR</a>
       </nav>
     </header>
@@ -60,6 +61,41 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div v-if="currentView === 'register'" class="space-y-6">
+        <div class="bg-white p-6 rounded-lg shadow border border-slate-100 max-w-md mx-auto">
+          <h2 class="text-xl font-bold mb-4 text-center">Registrar Nueva Bicicleta</h2>
+          <form @submit.prevent="registerBike" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">ID del Dueño (Usuario)</label>
+              <input v-model.number="newBike.owner_id" type="number" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Número de Serie</label>
+              <input v-model="newBike.serial_number" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Marca</label>
+              <input v-model="newBike.brand" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Modelo</label>
+              <input v-model="newBike.model" type="text" class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
+              <select v-model="newBike.type" class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="traditional">Tradicional</option>
+                <option value="electric">Eléctrica</option>
+              </select>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition">Guardar Bicicleta</button>
+            <div v-if="registerMessage" :class="['p-3 rounded mt-4 text-sm font-medium break-all', registerIsError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700']">
+              {{ registerMessage }}
+            </div>
+          </form>
         </div>
       </div>
 
@@ -118,6 +154,16 @@ const message = ref('');
 const isError = ref(false);
 const checkoutData = ref(null);
 
+const newBike = ref({
+  owner_id: 1,
+  serial_number: '',
+  brand: '',
+  model: '',
+  type: 'traditional'
+});
+const registerMessage = ref('');
+const registerIsError = ref(false);
+
 const fetchDashboardData = async () => {
   try {
     const statsRes = await fetch(`${API_URL}/dashboard/stats`);
@@ -151,6 +197,37 @@ const checkIn = async () => {
   } catch (err) {
     showMessage("Error de conexión", true);
   }
+};
+
+const registerBike = async () => {
+  try {
+    const res = await fetch(`${API_URL}/bikes?owner_id=${newBike.value.owner_id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        serial_number: newBike.value.serial_number,
+        brand: newBike.value.brand,
+        model: newBike.value.model,
+        type: newBike.value.type
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      registerMessage.value = `Bicicleta registrada exitosamente. Tu código QR es: ${data.qr_code}`;
+      registerIsError.value = false;
+      newBike.value.serial_number = '';
+      newBike.value.brand = '';
+      newBike.value.model = '';
+      fetchDashboardData();
+    } else {
+      registerMessage.value = data.detail || 'Error al registrar la bicicleta';
+      registerIsError.value = true;
+    }
+  } catch (err) {
+    registerMessage.value = 'Error de conexión';
+    registerIsError.value = true;
+  }
+  setTimeout(() => { registerMessage.value = ''; }, 8000);
 };
 
 const checkOut = async () => {
