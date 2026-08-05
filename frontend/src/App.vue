@@ -8,6 +8,7 @@
       <nav class="flex gap-4">
         <a href="#" @click.prevent="currentView = 'dashboard'" :class="{'font-bold underline': currentView === 'dashboard'}">Dashboard</a>
         <a href="#" @click.prevent="currentView = 'register'" :class="{'font-bold underline': currentView === 'register'}">Registro</a>
+        <a href="#" @click.prevent="currentView = 'bikes'" :class="{'font-bold underline': currentView === 'bikes'}">Directorio QR</a>
         <a href="#" @click.prevent="currentView = 'checkin'" :class="{'font-bold underline': currentView === 'checkin'}">Simulador QR</a>
       </nav>
     </header>
@@ -65,37 +66,102 @@
       </div>
 
       <div v-if="currentView === 'register'" class="space-y-6">
-        <div class="bg-white p-6 rounded-lg shadow border border-slate-100 max-w-md mx-auto">
-          <h2 class="text-xl font-bold mb-4 text-center">Registrar Nueva Bicicleta</h2>
-          <form @submit.prevent="registerBike" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">ID del Dueño (Usuario)</label>
-              <input v-model.number="newBike.owner_id" type="number" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Número de Serie</label>
-              <input v-model="newBike.serial_number" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Marca</label>
-              <input v-model="newBike.brand" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Modelo</label>
-              <input v-model="newBike.model" type="text" class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
-              <select v-model="newBike.type" class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="traditional">Tradicional</option>
-                <option value="electric">Eléctrica</option>
-              </select>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition">Guardar Bicicleta</button>
-            <div v-if="registerMessage" :class="['p-3 rounded mt-4 text-sm font-medium break-all', registerIsError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700']">
-              {{ registerMessage }}
-            </div>
-          </form>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
+            <h2 class="text-xl font-bold mb-4 text-center">Registrar Usuario</h2>
+            <form @submit.prevent="registerUser" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Nombre de Usuario</label>
+                <input v-model="newUser.username" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico</label>
+                <input v-model="newUser.email" type="email" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+                <input v-model="newUser.password" type="password" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded font-medium hover:bg-indigo-700 transition">Crear Usuario</button>
+              <div v-if="userRegisterMessage" :class="['p-3 rounded mt-4 text-sm font-medium break-all', userRegisterIsError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700']">
+                {{ userRegisterMessage }}
+              </div>
+            </form>
+          </div>
+
+          <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
+            <h2 class="text-xl font-bold mb-4 text-center">Registrar Nueva Bicicleta</h2>
+            <form @submit.prevent="registerBike" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Dueño (Usuario)</label>
+                <select v-model.number="newBike.owner_id" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500">
+                  <option disabled value="">Seleccione un usuario...</option>
+                  <option v-for="user in users" :key="user.id" :value="user.id">
+                    {{ user.username }} ({{ user.email }})
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Número de Serie</label>
+                <input v-model="newBike.serial_number" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Marca</label>
+                <input v-model="newBike.brand" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Modelo</label>
+                <input v-model="newBike.model" type="text" class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
+                <select v-model="newBike.type" class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="traditional">Tradicional</option>
+                  <option value="electric">Eléctrica</option>
+                </select>
+              </div>
+              <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition">Guardar Bicicleta</button>
+              <div v-if="registerMessage" :class="['p-3 rounded mt-4 text-sm font-medium break-all', registerIsError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700']">
+                {{ registerMessage }}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="currentView === 'bikes'" class="space-y-6">
+        <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Directorio de Bicicletas y Códigos QR</h2>
+            <button @click="fetchBikes" class="text-sm bg-slate-100 px-3 py-1 rounded hover:bg-slate-200">Actualizar</button>
+          </div>
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b bg-slate-50">
+                <th class="p-3 text-sm font-semibold text-slate-600">Propietario</th>
+                <th class="p-3 text-sm font-semibold text-slate-600">Bicicleta</th>
+                <th class="p-3 text-sm font-semibold text-slate-600">Tipo</th>
+                <th class="p-3 text-sm font-semibold text-slate-600">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="bike in bikes" :key="bike.id" class="border-b hover:bg-slate-50">
+                <td class="p-3 font-medium">{{ getUserName(bike.owner_id) }}</td>
+                <td class="p-3">{{ bike.brand }} {{ bike.model ? '- ' + bike.model : '' }} <span class="text-xs text-slate-400 block">{{ bike.serial_number }}</span></td>
+                <td class="p-3">
+                  <span :class="bike.type === 'electric' ? 'text-blue-600' : 'text-slate-600'">
+                    {{ bike.type === 'electric' ? '⚡ Eléctrica' : 'Tradicional' }}
+                  </span>
+                </td>
+                <td class="p-3">
+                  <button @click="showQr(bike)" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-sm font-bold hover:bg-indigo-200 transition">Generar QR</button>
+                </td>
+              </tr>
+              <tr v-if="bikes.length === 0">
+                <td colspan="4" class="p-4 text-center text-slate-500">No hay bicicletas registradas</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -132,11 +198,28 @@
         </div>
       </div>
     </main>
+
+    <!-- Modal QR -->
+    <div v-if="selectedBikeQr" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="closeQr">
+      <div class="bg-white p-6 rounded-lg max-w-sm w-full text-center shadow-xl">
+        <h3 class="text-xl font-bold mb-1">Código QR de Acceso</h3>
+        <p class="text-sm font-medium text-blue-600 mb-4">{{ getUserName(selectedBikeQr.owner_id) }}</p>
+        
+        <div class="bg-white p-4 inline-block rounded-xl border-4 border-slate-100 mb-4 shadow-sm">
+          <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(selectedBikeQr.qr_code)}`" alt="QR Code" class="mx-auto" />
+        </div>
+        
+        <p class="text-slate-600 font-medium mb-1">{{ selectedBikeQr.brand }} {{ selectedBikeQr.model ? '- ' + selectedBikeQr.model : '' }}</p>
+        <p class="text-xs font-mono bg-slate-100 p-2 rounded mb-4 break-all text-slate-500">{{ selectedBikeQr.qr_code }}</p>
+        
+        <button @click="closeQr" class="w-full bg-slate-800 text-white py-2 rounded-lg font-medium hover:bg-slate-900 transition">Cerrar</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -155,7 +238,7 @@ const isError = ref(false);
 const checkoutData = ref(null);
 
 const newBike = ref({
-  owner_id: 1,
+  owner_id: '',
   serial_number: '',
   brand: '',
   model: '',
@@ -163,6 +246,18 @@ const newBike = ref({
 });
 const registerMessage = ref('');
 const registerIsError = ref(false);
+
+const users = ref([]);
+const bikes = ref([]);
+const selectedBikeQr = ref(null);
+
+const newUser = ref({
+  username: '',
+  email: '',
+  password: ''
+});
+const userRegisterMessage = ref('');
+const userRegisterIsError = ref(false);
 
 const fetchDashboardData = async () => {
   try {
@@ -174,6 +269,79 @@ const fetchDashboardData = async () => {
   } catch (err) {
     console.error("Error fetching dashboard data:", err);
   }
+};
+
+const fetchUsers = async () => {
+  try {
+    const res = await fetch(`${API_URL}/users`);
+    if (res.ok) {
+      users.value = await res.json();
+    }
+  } catch (err) {
+    console.error("Error fetching users:", err);
+  }
+};
+
+const fetchBikes = async () => {
+  try {
+    const res = await fetch(`${API_URL}/bikes`);
+    if (res.ok) {
+      bikes.value = await res.json();
+    }
+  } catch (err) {
+    console.error("Error fetching bikes:", err);
+  }
+};
+
+const getUserName = (ownerId) => {
+  const user = users.value.find(u => u.id === ownerId);
+  return user ? user.username : 'Desconocido';
+};
+
+const showQr = (bike) => {
+  selectedBikeQr.value = bike;
+};
+
+const closeQr = () => {
+  selectedBikeQr.value = null;
+};
+
+// Cargar las bicicletas cuando se abre la vista del directorio
+watch(currentView, (newVal) => {
+  if (newVal === 'bikes') {
+    fetchBikes();
+  }
+});
+
+const registerUser = async () => {
+  try {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: newUser.value.username,
+        email: newUser.value.email,
+        password: newUser.value.password
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      userRegisterMessage.value = `Usuario registrado exitosamente (ID: ${data.id})`;
+      userRegisterIsError.value = false;
+      newUser.value.username = '';
+      newUser.value.email = '';
+      newUser.value.password = '';
+      await fetchUsers();
+      newBike.value.owner_id = data.id;
+    } else {
+      userRegisterMessage.value = data.detail || 'Error al registrar usuario';
+      userRegisterIsError.value = true;
+    }
+  } catch (err) {
+    userRegisterMessage.value = 'Error de conexión';
+    userRegisterIsError.value = true;
+  }
+  setTimeout(() => { userRegisterMessage.value = ''; }, 5000);
 };
 
 const checkIn = async () => {
@@ -213,12 +381,13 @@ const registerBike = async () => {
     });
     const data = await res.json();
     if (res.ok) {
-      registerMessage.value = `Bicicleta registrada exitosamente. Tu código QR es: ${data.qr_code}`;
+      registerMessage.value = `Bicicleta registrada exitosamente. Puedes ver su QR en el Directorio.`;
       registerIsError.value = false;
       newBike.value.serial_number = '';
       newBike.value.brand = '';
       newBike.value.model = '';
       fetchDashboardData();
+      fetchBikes();
     } else {
       registerMessage.value = data.detail || 'Error al registrar la bicicleta';
       registerIsError.value = true;
@@ -287,6 +456,8 @@ const showMessage = (msg, error = false) => {
 
 onMounted(() => {
   fetchDashboardData();
+  fetchUsers();
+  fetchBikes();
   // Polling para actualizar datos
   setInterval(fetchDashboardData, 5000);
 });
