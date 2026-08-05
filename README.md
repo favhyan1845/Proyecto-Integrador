@@ -27,8 +27,8 @@ Este proyecto es una prueba de concepto para la gestión de un BiciParking que i
    pip install -r requirements.txt
    ```
 4. Configura la Base de Datos:
-   - Por defecto, el archivo `.env` usa SQLite (`biciparking.db`).
-   - Para usar **MySQL**, edita `backend/.env` y descomenta/modifica la línea `DATABASE_URL` con tus credenciales de MySQL (ej. `mysql+pymysql://root:password@localhost:3306/biciparking_db`).
+   - Por defecto, el archivo `.env` está configurado para conectarse a **MariaDB** local usando `mysql+pymysql://root:@127.0.0.1:3306/biciparking_db`. 
+   - **Nota importante**: Debes asegurarte de crear previamente la base de datos `biciparking_db` en tu servidor MariaDB. Puedes hacerlo ejecutando `CREATE DATABASE biciparking_db;` en tu consola SQL.
 5. Ejecuta el servidor:
    ```bash
    uvicorn main:app --reload --host 0.0.0.0 --port 8000
