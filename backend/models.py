@@ -38,7 +38,7 @@ class ParkingRecord(Base):
     entry_time = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     exit_time = Column(DateTime, nullable=True)
     status = Column(String(20), default="active")  # active, pending_payment, completed
-    base_rate = Column(Float, default=100.0)  # Tarifa por minuto (ej. 100 COP)
+    base_rate = Column(Float, default=10.0)  # Tarifa por minuto (ej. 10 COP)
     total_amount = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 

@@ -45,6 +45,7 @@
                 <th class="p-3 text-sm font-semibold text-slate-600">Bicicleta</th>
                 <th class="p-3 text-sm font-semibold text-slate-600">Dueño</th>
                 <th class="p-3 text-sm font-semibold text-slate-600">Ingreso</th>
+                <th class="p-3 text-sm font-semibold text-slate-600">Tiempo / Costo</th>
                 <th class="p-3 text-sm font-semibold text-slate-600">Carga Eléctrica</th>
               </tr>
             </thead>
@@ -52,7 +53,11 @@
               <tr v-for="parking in activeParkings" :key="parking.id" class="border-b hover:bg-slate-50">
                 <td class="p-3">{{ parking.bike.brand }} - {{ parking.bike.serial_number }}</td>
                 <td class="p-3">{{ parking.bike.owner ? parking.bike.owner.username : 'Desconocido' }}</td>
-                <td class="p-3">{{ new Date(parking.entry_time).toLocaleString() }}</td>
+                <td class="p-3">{{ new Date(parking.entry_time).toLocaleTimeString() }}</td>
+                <td class="p-3 font-medium text-blue-700">
+                  {{ calculateCurrentCost(parking.entry_time, parking.base_rate).minutes }} min / 
+                  ${{ calculateCurrentCost(parking.entry_time, parking.base_rate).cost }}
+                </td>
                 <td class="p-3">
                   <span v-if="parking.energy_consumption && parking.energy_consumption.status === 'active'" class="text-green-600 font-semibold text-sm flex items-center gap-1">
                     ⚡ Cargando
@@ -250,6 +255,19 @@ const registerIsError = ref(false);
 const users = ref([]);
 const bikes = ref([]);
 const selectedBikeQr = ref(null);
+const now = ref(new Date());
+
+const calculateCurrentCost = (entryTime, baseRate) => {
+  // Asegurar formato UTC
+  const entry = new Date(entryTime + (entryTime.endsWith('Z') ? '' : 'Z'));
+  let diffMs = now.value - entry;
+  if (diffMs < 0) diffMs = 0;
+  const minutes = Math.max(1, Math.floor(diffMs / 60000));
+  return {
+    minutes,
+    cost: (minutes * (baseRate || 10)).toFixed(2)
+  };
+};
 
 const newUser = ref({
   username: '',
@@ -359,6 +377,7 @@ const checkIn = async () => {
       qrCode.value = '';
       checkoutData.value = null;
       fetchDashboardData();
+      currentView.value = 'dashboard';
     } else {
       showMessage(data.detail, true);
     }
@@ -459,6 +478,9 @@ onMounted(() => {
   fetchUsers();
   fetchBikes();
   // Polling para actualizar datos
-  setInterval(fetchDashboardData, 5000);
+  setInterval(() => {
+    now.value = new Date();
+    fetchDashboardData();
+  }, 5000);
 });
 </script>

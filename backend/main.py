@@ -139,7 +139,7 @@ def parking_check_in(req: schemas.CheckInRequest, db: Session = Depends(get_db))
         bike_id=bike.id,
         entry_time=datetime.datetime.utcnow(),
         status="active",
-        base_rate=100.0  # COP por minuto
+        base_rate=10.0  # COP por minuto
     )
     db.add(new_parking)
     db.commit()
@@ -351,10 +351,6 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     total_registered_bikes = db.query(models.Bike).count()
     
     # Calcular ingresos totales sumando los pagos exitosos
-    revenue_sum = db.query(models.Payment).filter(models.Payment.status == "paid").sum(models.Payment.amount)
-    total_revenue = float(revenue_sum) if revenue_sum is not None else 0.0
-
-    # Alternativa manual por si el driver o ORM devuelve None en query vacía
     payments = db.query(models.Payment).filter(models.Payment.status == "paid").all()
     total_revenue = sum([p.amount for p in payments])
 
