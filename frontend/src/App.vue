@@ -76,6 +76,10 @@
             <h2 class="text-xl font-bold mb-4 text-center">Registrar Usuario</h2>
             <form @submit.prevent="registerUser" class="space-y-4">
               <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Nombre de la persona</label>
+                <input v-model="newUser.full_name" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Nombre de Usuario</label>
                 <input v-model="newUser.username" type="text" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
@@ -102,7 +106,7 @@
                 <select v-model.number="newBike.owner_id" required class="w-full border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500">
                   <option disabled value="">Seleccione un usuario...</option>
                   <option v-for="user in users" :key="user.id" :value="user.id">
-                    {{ user.username }} ({{ user.email }})
+                    {{ user.full_name || user.username }} ({{ user.email }})
                   </option>
                 </select>
               </div>
@@ -270,6 +274,7 @@ const calculateCurrentCost = (entryTime, baseRate) => {
 };
 
 const newUser = ref({
+  full_name: '',
   username: '',
   email: '',
   password: ''
@@ -313,7 +318,7 @@ const fetchBikes = async () => {
 
 const getUserName = (ownerId) => {
   const user = users.value.find(u => u.id === ownerId);
-  return user ? user.username : 'Desconocido';
+  return user ? (user.full_name || user.username) : 'Desconocido';
 };
 
 const showQr = (bike) => {
@@ -337,6 +342,7 @@ const registerUser = async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        full_name: newUser.value.full_name,
         username: newUser.value.username,
         email: newUser.value.email,
         password: newUser.value.password
@@ -346,6 +352,7 @@ const registerUser = async () => {
     if (res.ok) {
       userRegisterMessage.value = `Usuario registrado exitosamente (ID: ${data.id})`;
       userRegisterIsError.value = false;
+      newUser.value.full_name = '';
       newUser.value.username = '';
       newUser.value.email = '';
       newUser.value.password = '';

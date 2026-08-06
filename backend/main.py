@@ -43,6 +43,7 @@ def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     
     # En producción usaríamos un hashing seguro como bcrypt/passlib, para este mockup guardamos simplificado
     new_user = models.User(
+        full_name=user_in.full_name,
         username=user_in.username,
         email=user_in.email,
         hashed_password=user_in.password,  # Guardado simple para fines demostrativos

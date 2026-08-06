@@ -4,6 +4,7 @@ import datetime
 
 # --- USUARIOS ---
 class UserBase(BaseModel):
+    full_name: Optional[str] = None
     username: str
     email: EmailStr
     role: Optional[str] = "cyclist"
