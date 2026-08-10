@@ -1,0 +1,42 @@
+Guion y Estructura de la Presentación: BiciParking Integral
+Tiempo máximo: 7 minutos
+
+🟢 1. Introducción del Proyecto (0:00 – 0:45)
+* Nombre del proyecto: BiciParking Integral - Sistema Digital de Gestión.
+* Integrantes del grupo: (Mencionas sus nombres).
+* Problema a resolver: La gestión ineficiente en los parqueaderos de bicicletas tradicionales: registros manuales demorados, pérdida de información, errores en el cálculo de tarifas por tiempo y falta de control de nuevos servicios como la recarga de bicicletas eléctricas.
+* Justificación: Se busca modernizar y digitalizar el ingreso, control y facturación de bicicletas mediante tecnología QR, mejorando la seguridad y agilizando el flujo de usuarios.
+
+🔵 2. Objetivos del Proyecto (0:45 – 1:15)
+* Objetivo General: Desarrollar un sistema web integral para automatizar el ingreso, salida y facturación de bicicletas en parqueaderos utilizando tecnología QR.
+* Objetivos Específicos:
+  1. Implementar un módulo de registro de dueños y bicicletas que asigne códigos QR únicos.
+  2. Construir un simulador de escáner QR que calcule el tiempo exacto de parqueo ($10/min) y los costos adicionales (como recarga eléctrica) de forma automática.
+
+🟡 3. Tecnologías Utilizadas (1:15 – 2:00)
+* Lenguajes: Python (Backend), JavaScript, HTML y CSS (Frontend).
+* Frameworks: FastAPI (para construir una API moderna y rápida) y Vue.js 3 + Tailwind CSS (para una interfaz interactiva y adaptativa).
+* Base de datos: SQLite a través de SQLAlchemy (ligera, ideal para el prototipo rápido sin dependencias pesadas).
+* Entorno: NodeJS (NPM) y Python Virtualenv.
+* ¿Por qué se eligieron?: Vue y Tailwind permiten hacer interfaces reactivas en tiempo real muy rápido, mientras que FastAPI es uno de los frameworks más veloces y modernos para Python, facilitando la integración a través de una API RESTful.
+
+🟠 4. Desarrollo de la Solución (2:00 – 4:30)
+* Arquitectura: Cliente-Servidor separada (Backend API Restful independiente del Frontend SPA - Single Page Application).
+* Estructura: 
+  - Base de datos: Almacena usuarios, bicicletas, registros de parqueo (historial) y pagos.
+  - Backend (FastAPI): Procesa la lógica de negocio (generación del QR, matemáticas del cobro según entrada y salida, verificación de credenciales).
+  - Frontend (Vue.js): Consume la API y muestra el Dashboard interactivo.
+* Flujo del sistema: Un usuario nuevo es registrado y se le asigna su bicicleta -> El sistema crea un QR -> El operario escanea el QR al entrar (Check-in) -> El sistema marca un "parqueo activo" e inicia cobros -> Al salir (Check-out), se detiene el tiempo, calcula los $10 pesos por minuto y emite el cobro.
+
+🔴 5. Demostración del Sistema (4:30 – 6:00)
+(Para esta sección, hablas mientras compartes pantalla y haces los siguientes pasos en vivo):
+1. Pestaña Registro: Crea un usuario ("Nombre de persona") y asóciale una nueva bicicleta.
+2. Pestaña Directorio QR: Muestra cómo el usuario recién creado aparece en la lista y presiona "Generar QR" para mostrar el código único generado. 
+3. Simulador QR: Copia el texto del código QR, pégalo en el simulador y dale a "Entrar (Check-in)".
+4. Dashboard en Tiempo Real: Muestra cómo el sistema saltó automáticamente al Dashboard. Resalta cómo subió el número de bicicletas, cómo aparece el registro en la tabla y cómo en la columna "Tiempo / Costo" empiezan a correr los minutos y a multiplicar por los $10.
+5. Check-out y Pago: Vuelve al Simulador QR, pega el código, presiona "Salir (Check-out)" y muestra el recibo final generado antes de darle al botón de pago.
+
+🟣 6. Resultados y Conclusiones (6:00 – 7:00)
+* Qué se logró: Se logró digitalizar completamente el proceso de recepción de bicicletas eliminando el uso de papel, consiguiendo cálculos financieros 100% exactos en tiempo real mediante una arquitectura escalable.
+* Dificultades encontradas: Sincronizar el reloj y el cálculo de tarifas en tiempo real en el Dashboard del Frontend con la base de datos del servidor; así como gestionar las relaciones entre dueños, bicicletas y consumos eléctricos.
+* Posibles mejoras (Trabajo futuro): Integrar una pasarela de pagos real (PSE, Nequi, etc.), utilizar una cámara de celular para escanear el QR físico (sustituyendo al actual simulador de texto) y conectar el backend con relés para abrir talanqueras de manera automática.
